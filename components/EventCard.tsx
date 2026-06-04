@@ -2,9 +2,15 @@ import Link from "next/link";
 import type { Event } from "@/lib/events";
 
 const statusLabels = {
-  open: "Регистрация открыта",
-  soon: "Скоро",
-  closed: "Закрыто"
+  open: "регистрация открыта",
+  soon: "скоро",
+  closed: "завершён"
+};
+
+const statusClasses = {
+  open: "bg-gold text-night",
+  soon: "bg-ocean/20 text-chrome ring-1 ring-ocean/40",
+  closed: "bg-white/10 text-steel ring-1 ring-white/10"
 };
 
 type EventCardProps = {
@@ -19,14 +25,16 @@ export function EventCard({ event }: EventCardProps) {
   }).format(new Date(event.date));
 
   return (
-    <article className="group overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] shadow-panel backdrop-blur">
+    <article className="group overflow-hidden rounded-lg border border-white/10 bg-white/[0.045] shadow-panel backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-gold/40">
       <div
-        className="min-h-56 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]"
-        style={{ backgroundImage: `linear-gradient(180deg, transparent, rgb(5 6 10 / 0.78)), url(${event.coverImage})` }}
+        className="min-h-64 bg-cover bg-center transition duration-700 group-hover:scale-[1.04]"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgb(5 6 10 / 0.02), rgb(5 6 10 / 0.84)), url(${event.coverImage})`
+        }}
       />
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.14em]">
-          <span className="rounded-full bg-gold px-3 py-1 text-night">
+          <span className={`rounded-full px-3 py-1 ${statusClasses[event.registrationStatus]}`}>
             {statusLabels[event.registrationStatus]}
           </span>
           <span className="text-steel">{event.city}</span>

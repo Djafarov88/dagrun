@@ -6,6 +6,7 @@ export type Event = {
   description: string;
   date: string;
   city: string;
+  location?: string;
   coverImage: string;
   registrationStatus: RegistrationStatus;
   distances: string[];
@@ -15,6 +16,9 @@ export type Event = {
     title: string;
   }>;
   partners: string[];
+  photoLinks?: string[];
+  videoLinks?: string[];
+  resultsLinks?: string[];
   featured?: boolean;
 };
 

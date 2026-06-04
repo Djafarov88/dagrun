@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { PublicBottomNav } from "@/components/public/PublicBottomNav";
 import { clubContent, oldSiteNavigation } from "@/lib/dagrun-content";
 import "./globals.css";
 
@@ -60,7 +61,7 @@ export default function RootLayout({
             <Link href="/" className="flex items-center">
               <Image src="/assets/dagrun-logo.svg" alt="DAGRUN" width={120} height={32} priority />
             </Link>
-            <div className="flex items-center gap-1 overflow-x-auto text-sm font-semibold text-steel">
+            <div className="hidden items-center gap-1 overflow-x-auto text-sm font-semibold text-steel md:flex">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -74,17 +75,35 @@ export default function RootLayout({
           </nav>
         </header>
         <main>{children}</main>
-        <footer className="border-t border-white/10 bg-night">
-          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-steel sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <footer className="border-t border-white/10 bg-night pb-24 md:pb-0">
+          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 text-sm text-steel sm:px-6 md:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
             <div>
-              <p>&copy; {new Date().getFullYear()} DAGRUN. Беговой клуб Дагестана.</p>
-              <p className="mt-1">{clubContent.location}</p>
+              <Image src="/assets/dagrun-logo.svg" alt="DAGRUN" width={138} height={37} />
+              <p className="mt-4 max-w-sm leading-6">
+                Крупнейшее беговое сообщество Дагестана: тренировки, старты и культура движения.
+              </p>
+              <p className="mt-2">{clubContent.location}</p>
             </div>
-            <Link href={clubContent.telegram} className="font-semibold text-chrome hover:text-gold">
-              Telegram DAGRUN
-            </Link>
+            <div>
+              <p className="font-black uppercase tracking-[0.14em] text-chrome">Навигация</p>
+              <div className="mt-4 grid gap-2">
+                {navItems.slice(0, 4).map((item) => (
+                  <Link key={item.href} href={item.href} className="hover:text-gold">
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="font-black uppercase tracking-[0.14em] text-chrome">Контакты</p>
+              <Link href={clubContent.telegram} className="mt-4 block font-semibold text-chrome hover:text-gold">
+                Telegram DAGRUN
+              </Link>
+              <p className="mt-4">&copy; {new Date().getFullYear()} DAGRUN</p>
+            </div>
           </div>
         </footer>
+        <PublicBottomNav />
       </body>
     </html>
   );
