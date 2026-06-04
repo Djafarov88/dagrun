@@ -7,21 +7,21 @@ export type Membership = {
 
 export const memberships: Membership[] = [
   {
-    name: "Starter",
-    price: "$12/mo",
-    summary: "For runners building consistency.",
-    features: ["Weekly community runs", "Route library access", "Member event pricing"]
+    name: "Base",
+    price: "2 900 ₽/мес",
+    summary: "Для тех, кто хочет бегать регулярно и быть в клубной среде.",
+    features: ["3 тренировки в неделю", "Общий чат DAGRUN", "Скидки на старты"]
   },
   {
-    name: "Regular",
-    price: "$28/mo",
-    summary: "For runners training with structure.",
-    features: ["All Starter benefits", "Coach-led workouts", "Monthly benchmark sessions"]
+    name: "Pro",
+    price: "5 900 ₽/мес",
+    summary: "Для подготовки к забегам с тренерской структурой.",
+    features: ["Все из Base", "План подготовки", "Контроль темпа и объема"]
   },
   {
-    name: "Performance",
-    price: "$48/mo",
-    summary: "For runners preparing for races.",
-    features: ["All Regular benefits", "Race plan review", "Priority event registration"]
+    name: "Elite",
+    price: "9 900 ₽/мес",
+    summary: "Для амбициозных целей, личного прогресса и стартов.",
+    features: ["Все из Pro", "Персональный разбор", "Приоритетная регистрация"]
   }
 ];

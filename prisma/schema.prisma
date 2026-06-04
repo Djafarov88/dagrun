@@ -13,6 +13,12 @@ enum EventStatus {
   CANCELLED
 }
 
+enum RegistrationStatus {
+  OPEN
+  SOON
+  CLOSED
+}
+
 enum MembershipTier {
   STARTER
   REGULAR
@@ -32,23 +38,37 @@ model User {
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  slug        String      @unique
-  title       String
-  summary     String
-  description String
-  location    String
-  distanceKm  Decimal     @db.Decimal(5, 2)
-  startsAt    DateTime
-  status      EventStatus @default(DRAFT)
-  capacity    Int?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                 String             @id @default(cuid())
+  slug               String             @unique
+  title              String
+  description        String
+  date               DateTime
+  city               String
+  coverImage         String
+  registrationStatus RegistrationStatus @default(SOON)
+  status             EventStatus        @default(DRAFT)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
+  distances     Distance[]
   registrations Registration[]
 
-  @@index([startsAt])
+  @@index([date])
+  @@index([city])
   @@index([status])
+  @@index([registrationStatus])
+}
+
+model Distance {
+  id        String  @id @default(cuid())
+  eventId   String
+  title     String
+  lengthKm  Decimal @db.Decimal(5, 2)
+  elevation Int?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
 }
 
 model Registration {

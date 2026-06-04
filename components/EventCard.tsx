@@ -1,51 +1,55 @@
 import Link from "next/link";
 import type { Event } from "@/lib/events";
 
+const statusLabels = {
+  open: "Регистрация открыта",
+  soon: "Скоро",
+  closed: "Закрыто"
+};
+
 type EventCardProps = {
   event: Event;
 };
 
 export function EventCard({ event }: EventCardProps) {
-  const date = new Intl.DateTimeFormat("en", {
-    month: "short",
+  const date = new Intl.DateTimeFormat("ru-RU", {
     day: "numeric",
+    month: "long",
     year: "numeric"
-  }).format(new Date(`${event.date}T${event.time}:00`));
+  }).format(new Date(event.date));
 
   return (
-    <article className="rounded-lg border border-ink/10 bg-white p-5 shadow-soft">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-[0.14em] text-pine">
-            {event.level}
-          </p>
-          <h2 className="mt-2 text-2xl font-black text-ink">{event.title}</h2>
-          <p className="mt-3 text-sm leading-6 text-asphalt">{event.summary}</p>
+    <article className="group overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] shadow-panel backdrop-blur">
+      <div
+        className="min-h-56 bg-cover bg-center transition duration-700 group-hover:scale-[1.03]"
+        style={{ backgroundImage: `linear-gradient(180deg, transparent, rgb(5 6 10 / 0.78)), url(${event.coverImage})` }}
+      />
+      <div className="p-5">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.14em]">
+          <span className="rounded-full bg-gold px-3 py-1 text-night">
+            {statusLabels[event.registrationStatus]}
+          </span>
+          <span className="text-steel">{event.city}</span>
         </div>
-        <div className="shrink-0 rounded-md bg-track px-4 py-3 text-sm font-bold text-ink">
-          {date}
+        <h2 className="mt-4 text-2xl font-black text-chrome">{event.title}</h2>
+        <p className="mt-3 text-sm leading-6 text-steel">{event.description}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {event.distances.map((distance) => (
+            <span key={distance} className="rounded-md border border-white/10 px-3 py-2 text-sm font-bold text-chrome">
+              {distance}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <p className="text-sm font-bold text-chrome">{date}</p>
+          <Link
+            href={`/events/${event.slug}`}
+            className="rounded-md bg-chrome px-4 py-3 text-sm font-black text-night transition hover:bg-gold"
+          >
+            Подробнее
+          </Link>
         </div>
       </div>
-      <dl className="mt-5 grid grid-cols-2 gap-3 text-sm text-asphalt sm:grid-cols-4">
-        <div>
-          <dt className="font-bold text-ink">Time</dt>
-          <dd>{event.time}</dd>
-        </div>
-        <div>
-          <dt className="font-bold text-ink">Distance</dt>
-          <dd>{event.distance}</dd>
-        </div>
-        <div className="col-span-2">
-          <dt className="font-bold text-ink">Location</dt>
-          <dd>{event.location}</dd>
-        </div>
-      </dl>
-      <Link
-        href={`/events/${event.slug}`}
-        className="mt-6 inline-flex rounded-md bg-ink px-4 py-3 text-sm font-bold text-white transition hover:bg-signal"
-      >
-        View details
-      </Link>
     </article>
   );
 }
