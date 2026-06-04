@@ -1,6 +1,9 @@
 "use server";
 
-import { EventStatus, RegistrationStatus } from "@prisma/client";
+import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
+import { EventStatus, ParticipantRegistrationStatus, RegistrationStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { linesToArray, toOptionalInt } from "@/lib/admin";
@@ -16,7 +19,45 @@ function requiredString(formData: FormData, key: string) {
   return value.trim();
 }
 
-function racePayload(formData: FormData) {
+function optionalString(formData: FormData, key: string) {
+  const value = formData.get(key);
+
+  if (typeof value !== "string" || value.trim() === "") {
+    return "";
+  }
+
+  return value.trim();
+}
+
+async function uploadedImagePath(formData: FormData, key: string) {
+  const value = formData.get(key);
+
+  if (!(value instanceof File) || value.size === 0) {
+    return null;
+  }
+
+  if (!value.type.startsWith("image/")) {
+    throw new Error("Only image uploads are supported");
+  }
+
+  const extension = path.extname(value.name) || ".jpg";
+  const fileName = `${randomUUID()}${extension}`;
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  await mkdir(uploadDir, { recursive: true });
+  await writeFile(path.join(uploadDir, fileName), Buffer.from(await value.arrayBuffer()));
+
+  return `/uploads/${fileName}`;
+}
+
+async function imageValue(formData: FormData, uploadKey: string, textKey: string) {
+  return (await uploadedImagePath(formData, uploadKey)) ?? requiredString(formData, textKey);
+}
+
+async function optionalImageValue(formData: FormData, uploadKey: string, textKey: string) {
+  return (await uploadedImagePath(formData, uploadKey)) ?? optionalString(formData, textKey);
+}
+
+async function racePayload(formData: FormData) {
   return {
     title: requiredString(formData, "title"),
     slug: requiredString(formData, "slug"),
@@ -24,7 +65,7 @@ function racePayload(formData: FormData) {
     date: new Date(requiredString(formData, "date")),
     city: requiredString(formData, "city"),
     location: requiredString(formData, "location"),
-    coverImage: requiredString(formData, "coverImage"),
+    coverImage: await imageValue(formData, "coverUpload", "coverImage"),
     status: requiredString(formData, "status") as EventStatus,
     registrationStatus: requiredString(formData, "registrationStatus") as RegistrationStatus,
     photoLinks: linesToArray(formData.get("photoLinks")),
@@ -45,7 +86,7 @@ function distancePayload(formData: FormData) {
 
 export async function createRace(formData: FormData) {
   const race = await prisma.event.create({
-    data: racePayload(formData),
+    data: await racePayload(formData),
     select: { id: true }
   });
 
@@ -57,7 +98,7 @@ export async function createRace(formData: FormData) {
 export async function updateRace(raceId: string, formData: FormData) {
   await prisma.event.update({
     where: { id: raceId },
-    data: racePayload(formData)
+    data: await racePayload(formData)
   });
 
   revalidatePath("/admin");
@@ -155,12 +196,14 @@ export async function deleteMembershipPlan(planId: string) {
 }
 
 export async function updateSiteContent(formData: FormData) {
+  const heroImage = await imageValue(formData, "heroUpload", "heroImage");
+
   await prisma.siteContent.upsert({
     where: { key: "homepage" },
     update: {
       heroTitle: requiredString(formData, "heroTitle"),
       heroSubtitle: requiredString(formData, "heroSubtitle"),
-      heroImage: requiredString(formData, "heroImage"),
+      heroImage,
       statParticipants: requiredString(formData, "statParticipants"),
       statTrainings: requiredString(formData, "statTrainings"),
       statEvents: requiredString(formData, "statEvents")
@@ -169,7 +212,7 @@ export async function updateSiteContent(formData: FormData) {
       key: "homepage",
       heroTitle: requiredString(formData, "heroTitle"),
       heroSubtitle: requiredString(formData, "heroSubtitle"),
-      heroImage: requiredString(formData, "heroImage"),
+      heroImage,
       statParticipants: requiredString(formData, "statParticipants"),
       statTrainings: requiredString(formData, "statTrainings"),
       statEvents: requiredString(formData, "statEvents")
@@ -185,7 +228,7 @@ export async function createTrainer(formData: FormData) {
     data: {
       name: requiredString(formData, "name"),
       role: requiredString(formData, "role"),
-      image: requiredString(formData, "image"),
+      image: await imageValue(formData, "imageUpload", "image"),
       bio: typeof formData.get("bio") === "string" ? String(formData.get("bio")) : "",
       sortOrder: toOptionalInt(formData.get("sortOrder")) ?? 0,
       active: formData.get("active") === "on"
@@ -201,7 +244,7 @@ export async function updateTrainer(trainerId: string, formData: FormData) {
     data: {
       name: requiredString(formData, "name"),
       role: requiredString(formData, "role"),
-      image: requiredString(formData, "image"),
+      image: await imageValue(formData, "imageUpload", "image"),
       bio: typeof formData.get("bio") === "string" ? String(formData.get("bio")) : "",
       sortOrder: toOptionalInt(formData.get("sortOrder")) ?? 0,
       active: formData.get("active") === "on"
@@ -221,7 +264,7 @@ export async function createPartner(formData: FormData) {
     data: {
       name: requiredString(formData, "name"),
       url: typeof formData.get("url") === "string" ? String(formData.get("url")) : "",
-      logo: typeof formData.get("logo") === "string" ? String(formData.get("logo")) : "",
+      logo: await optionalImageValue(formData, "logoUpload", "logo"),
       sortOrder: toOptionalInt(formData.get("sortOrder")) ?? 0,
       active: formData.get("active") === "on"
     }
@@ -236,7 +279,7 @@ export async function updatePartner(partnerId: string, formData: FormData) {
     data: {
       name: requiredString(formData, "name"),
       url: typeof formData.get("url") === "string" ? String(formData.get("url")) : "",
-      logo: typeof formData.get("logo") === "string" ? String(formData.get("logo")) : "",
+      logo: await optionalImageValue(formData, "logoUpload", "logo"),
       sortOrder: toOptionalInt(formData.get("sortOrder")) ?? 0,
       active: formData.get("active") === "on"
     }
@@ -248,4 +291,86 @@ export async function updatePartner(partnerId: string, formData: FormData) {
 export async function deletePartner(partnerId: string) {
   await prisma.partner.delete({ where: { id: partnerId } });
   revalidatePath("/admin/content");
+}
+
+function registrationPayload(formData: FormData) {
+  return {
+    eventId: requiredString(formData, "eventId"),
+    distanceId: requiredString(formData, "distanceId"),
+    firstName: requiredString(formData, "firstName"),
+    lastName: requiredString(formData, "lastName"),
+    email: requiredString(formData, "email").toLowerCase(),
+    phone: requiredString(formData, "phone"),
+    birthDate: optionalString(formData, "birthDate")
+      ? new Date(`${optionalString(formData, "birthDate")}T00:00:00`)
+      : null,
+    emergencyContact: optionalString(formData, "emergencyContact") || null,
+    status: requiredString(formData, "status") as ParticipantRegistrationStatus
+  };
+}
+
+export async function createAdminRegistration(formData: FormData) {
+  const payload = registrationPayload(formData);
+  const distance = await prisma.distance.findUnique({
+    where: { id: payload.distanceId },
+    select: { eventId: true }
+  });
+
+  if (!distance || distance.eventId !== payload.eventId) {
+    throw new Error("Selected distance does not belong to the selected event");
+  }
+
+  const user = await prisma.user.upsert({
+    where: { email: payload.email },
+    update: { name: `${payload.firstName} ${payload.lastName}` },
+    create: { email: payload.email, name: `${payload.firstName} ${payload.lastName}` }
+  });
+
+  const registration = await prisma.registration.create({
+    data: {
+      ...payload,
+      userId: user.id
+    },
+    select: { id: true }
+  });
+
+  revalidatePath("/admin/participants");
+  redirect(`/admin/participants/${registration.id}/edit`);
+}
+
+export async function updateAdminRegistration(registrationId: string, formData: FormData) {
+  const payload = registrationPayload(formData);
+  const distance = await prisma.distance.findUnique({
+    where: { id: payload.distanceId },
+    select: { eventId: true }
+  });
+
+  if (!distance || distance.eventId !== payload.eventId) {
+    throw new Error("Selected distance does not belong to the selected event");
+  }
+
+  const user = await prisma.user.upsert({
+    where: { email: payload.email },
+    update: { name: `${payload.firstName} ${payload.lastName}` },
+    create: { email: payload.email, name: `${payload.firstName} ${payload.lastName}` }
+  });
+
+  await prisma.registration.update({
+    where: { id: registrationId },
+    data: {
+      ...payload,
+      userId: user.id
+    }
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/participants");
+  revalidatePath(`/admin/participants/${registrationId}/edit`);
+}
+
+export async function deleteAdminRegistration(registrationId: string) {
+  await prisma.registration.delete({ where: { id: registrationId } });
+  revalidatePath("/admin");
+  revalidatePath("/admin/participants");
+  redirect("/admin/participants");
 }

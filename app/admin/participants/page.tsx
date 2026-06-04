@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { deleteAdminRegistration } from "@/app/admin/actions";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { prisma } from "@/lib/prisma";
 
@@ -46,6 +47,9 @@ export default async function ParticipantsPage({ searchParams }: ParticipantsPag
           <Link href={exportHref} className="rounded-md bg-gold px-5 py-3 text-sm font-black text-night">
             Export CSV
           </Link>
+          <Link href="/admin/participants/new" className="rounded-md bg-chrome px-5 py-3 text-sm font-black text-night">
+            Create registration
+          </Link>
         </div>
 
         <form className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -67,6 +71,7 @@ export default async function ParticipantsPage({ searchParams }: ParticipantsPag
                 <th className="p-4">Event</th>
                 <th className="p-4">Distance</th>
                 <th className="p-4">Status</th>
+                <th className="p-4">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
@@ -83,6 +88,18 @@ export default async function ParticipantsPage({ searchParams }: ParticipantsPag
                   <td className="p-4 text-steel">{registration.event.title}</td>
                   <td className="p-4 text-steel">{registration.distance.title}</td>
                   <td className="p-4 font-bold text-gold">{registration.status}</td>
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <Link href={`/admin/participants/${registration.id}/edit`} className="rounded-md bg-chrome px-3 py-2 text-xs font-black text-night">
+                        Edit
+                      </Link>
+                      <form action={deleteAdminRegistration.bind(null, registration.id)}>
+                        <button className="rounded-md border border-flame/50 px-3 py-2 text-xs font-black text-flame">
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

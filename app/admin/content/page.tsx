@@ -32,7 +32,7 @@ export default async function ContentPage() {
         <p className="text-sm font-black uppercase tracking-[0.18em] text-gold">Content</p>
         <h1 className="mt-3 text-4xl font-black text-chrome">Homepage content</h1>
 
-        <form action={updateSiteContent} className="mt-8 grid gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel lg:grid-cols-3">
+        <form action={updateSiteContent} encType="multipart/form-data" className="mt-8 grid gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel lg:grid-cols-3">
           <label className="grid gap-2 lg:col-span-3">
             <span className={labelClass}>Hero title</span>
             <input name="heroTitle" required defaultValue={content?.heroTitle ?? "Крупнейшее беговое сообщество Дагестана"} className={inputClass} />
@@ -43,7 +43,11 @@ export default async function ContentPage() {
           </label>
           <label className="grid gap-2 lg:col-span-3">
             <span className={labelClass}>Hero image</span>
-            <input name="heroImage" required defaultValue={content?.heroImage ?? "https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?auto=format&fit=crop&w=2200&q=85"} className={inputClass} />
+            <input name="heroImage" defaultValue={content?.heroImage ?? "https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?auto=format&fit=crop&w=2200&q=85"} className={inputClass} />
+          </label>
+          <label className="grid gap-2 lg:col-span-3">
+            <span className={labelClass}>Upload hero image</span>
+            <input name="heroUpload" type="file" accept="image/*" className={inputClass} />
           </label>
           <label className="grid gap-2">
             <span className={labelClass}>Participants stat</span>
@@ -125,17 +129,19 @@ function ContentCollection({
   return (
     <section className="mt-10 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel">
       <h2 className="text-3xl font-black text-chrome">{title}</h2>
-      <form action={createAction} className="mt-5 grid gap-3 lg:grid-cols-5">
+      <form action={createAction} encType="multipart/form-data" className="mt-5 grid gap-3 lg:grid-cols-5">
         <input name="name" required placeholder="Name" className={inputClass} />
         {partnerMode ? (
           <>
             <input name="url" placeholder="URL" className={inputClass} />
             <input name="logo" placeholder="Logo URL" className={inputClass} />
+            <input name="logoUpload" type="file" accept="image/*" className={inputClass} />
           </>
         ) : (
           <>
             <input name="role" required placeholder="Role" className={inputClass} />
-            <input name="image" required placeholder="Image URL" className={inputClass} />
+            <input name="image" placeholder="Image URL" className={inputClass} />
+            <input name="imageUpload" type="file" accept="image/*" className={inputClass} />
             <input name="bio" placeholder="Bio" className={inputClass} />
           </>
         )}
@@ -148,10 +154,11 @@ function ContentCollection({
 
       <div className="mt-5 grid gap-4">
         {items.map((item) => (
-          <form key={item.id} action={item.updateAction} className="grid gap-3 rounded-lg border border-white/10 bg-night p-4 lg:grid-cols-5">
+          <form key={item.id} action={item.updateAction} encType="multipart/form-data" className="grid gap-3 rounded-lg border border-white/10 bg-night p-4 lg:grid-cols-5">
             {item.fields.map(([name, value]) => (
               <input key={name} name={name} defaultValue={value} placeholder={name} className={inputClass} />
             ))}
+            <input name={partnerMode ? "logoUpload" : "imageUpload"} type="file" accept="image/*" className={inputClass} />
             <label className="flex items-center gap-2 text-sm font-bold text-chrome">
               <input name="active" type="checkbox" defaultChecked={item.active} /> Active
             </label>

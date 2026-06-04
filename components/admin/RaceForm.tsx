@@ -14,7 +14,7 @@ const labelClass = "text-xs font-black uppercase tracking-[0.14em] text-steel";
 
 export function RaceForm({ action, race, submitLabel }: RaceFormProps) {
   return (
-    <form action={action} className="grid gap-5 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel sm:p-6">
+    <form action={action} encType="multipart/form-data" className="grid gap-5 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel sm:p-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="grid gap-2">
           <span className={labelClass}>Title</span>
@@ -55,7 +55,11 @@ export function RaceForm({ action, race, submitLabel }: RaceFormProps) {
 
       <label className="grid gap-2">
         <span className={labelClass}>Cover image URL</span>
-        <input name="coverImage" type="url" required defaultValue={race?.coverImage} className={inputClass} />
+        <input name="coverImage" type="url" defaultValue={race?.coverImage} className={inputClass} />
+      </label>
+      <label className="grid gap-2">
+        <span className={labelClass}>Upload cover image</span>
+        <input name="coverUpload" type="file" accept="image/*" className={inputClass} />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
