@@ -52,6 +52,7 @@ model Event {
   description        String
   date               DateTime
   city               String
+  location           String             @default("")
   coverImage         String
   photoLinks         String[]           @default([])
   videoLinks         String[]           @default([])
@@ -68,6 +69,62 @@ model Event {
   @@index([city])
   @@index([status])
   @@index([registrationStatus])
+}
+
+model MembershipPlan {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  price       Decimal  @default(0) @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  features    String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active])
+}
+
+model SiteContent {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  heroTitle       String   @default("")
+  heroSubtitle    String   @default("")
+  heroImage       String   @default("")
+  statParticipants String  @default("5000+")
+  statTrainings   String   @default("3")
+  statEvents      String   @default("10+")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Trainer {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  image     String
+  bio       String   @default("")
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  url       String   @default("")
+  logo      String   @default("")
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
 }
 
 model Distance {

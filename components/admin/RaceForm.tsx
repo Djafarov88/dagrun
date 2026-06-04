@@ -49,6 +49,11 @@ export function RaceForm({ action, race, submitLabel }: RaceFormProps) {
       </div>
 
       <label className="grid gap-2">
+        <span className={labelClass}>Location</span>
+        <input name="location" required defaultValue={race?.location} className={inputClass} />
+      </label>
+
+      <label className="grid gap-2">
         <span className={labelClass}>Cover image URL</span>
         <input name="coverImage" type="url" required defaultValue={race?.coverImage} className={inputClass} />
       </label>
