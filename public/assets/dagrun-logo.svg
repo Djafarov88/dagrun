@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" role="img" aria-labelledby="title">
+  <title id="title">DAGRUN</title>
+  <rect width="360" height="96" rx="12" fill="#05060a"/>
+  <text x="28" y="64" fill="#e9edf5" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="900" letter-spacing="2">DAGRUN</text>
+  <rect x="28" y="75" width="196" height="6" fill="#d7ff35"/>
+</svg>

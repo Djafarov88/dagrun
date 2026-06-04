@@ -1,37 +1,9 @@
 import Link from "next/link";
 import { Countdown } from "@/components/Countdown";
 import { EventCard } from "@/components/EventCard";
+import { clubContent, partners, stats, trainers } from "@/lib/dagrun-content";
 import { events, getFeaturedEvent } from "@/lib/events";
 import { memberships } from "@/lib/memberships";
-
-const stats = [
-  { value: "5000+", label: "участников" },
-  { value: "3", label: "тренировки в неделю" },
-  { value: "10+", label: "событий в год" }
-];
-
-const trainers = [
-  {
-    name: "Магомед Алиев",
-    role: "Главный тренер",
-    image:
-      "https://images.unsplash.com/photo-1517344884509-a0c97ec11bcc?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    name: "Амина Гасанова",
-    role: "Тренер по технике",
-    image:
-      "https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    name: "Расул Омаров",
-    role: "Трейл и выносливость",
-    image:
-      "https://images.unsplash.com/photo-1567013127542-490d757e6349?auto=format&fit=crop&w=900&q=85"
-  }
-];
-
-const partners = ["Sport Energy", "Caspian Water", "Dagestan Tourism", "Pulse Media"];
 
 export default function HomePage() {
   const featuredEvent = getFeaturedEvent();
@@ -44,6 +16,7 @@ export default function HomePage() {
   return (
     <>
       <section
+        id="club"
         className="relative isolate min-h-[calc(100svh-57px)] overflow-hidden bg-cover bg-center"
         style={{
           backgroundImage:
@@ -54,15 +27,15 @@ export default function HomePage() {
         <div className="mx-auto flex min-h-[calc(100svh-57px)] max-w-6xl flex-col justify-end px-4 pb-14 pt-24 sm:px-6 lg:px-8">
           <div className="animate-rise max-w-4xl">
             <p className="text-sm font-black uppercase tracking-[0.24em] text-gold">
-              DAGRUN / Dagestan running community
+              {clubContent.eyebrow}
             </p>
             <h1 className="mt-5 text-5xl font-black leading-[0.95] tracking-normal text-chrome sm:text-7xl lg:text-8xl">
-              Крупнейшее беговое сообщество Дагестана
+              {clubContent.title}
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-steel sm:text-xl">
-              Тренировки, забеги и сильная спортивная культура для тех, кто бежит быстрее,
-              дальше и осознаннее.
+              {clubContent.intro}
             </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-steel">{clubContent.schedule}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/memberships"
@@ -95,6 +68,15 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-3xl">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">О клубе</p>
+          <h2 className="mt-3 text-4xl font-black text-chrome">Беговое сообщество DAGRUN</h2>
+          <p className="mt-4 text-base leading-7 text-steel">{clubContent.description}</p>
+          <p className="mt-4 text-base leading-7 text-steel">{clubContent.atmosphere}</p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
           <div
             className="min-h-[30rem] rounded-lg bg-cover bg-center shadow-panel"
@@ -103,12 +85,8 @@ export default function HomePage() {
             }}
           />
           <div className="rounded-lg border border-white/10 bg-white/[0.04] p-6 shadow-glow backdrop-blur sm:p-8">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">
-              Главный старт
-            </p>
-            <h2 className="mt-4 text-4xl font-black text-chrome sm:text-5xl">
-              {featuredEvent.title}
-            </h2>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Главный старт</p>
+            <h2 className="mt-4 text-4xl font-black text-chrome sm:text-5xl">{featuredEvent.title}</h2>
             <p className="mt-4 text-base leading-7 text-steel">{featuredEvent.description}</p>
             <div className="mt-6">
               <Countdown targetDate={featuredEvent.date} />
@@ -139,7 +117,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Calendar</p>
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Забеги</p>
               <h2 className="mt-3 text-4xl font-black text-chrome">Календарь событий</h2>
             </div>
             <Link href="/events" className="text-sm font-black uppercase tracking-[0.12em] text-gold">
@@ -154,6 +132,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="gallery" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Галерея</p>
+        <h2 className="mt-3 text-4xl font-black text-chrome">Атмосфера тренировок и стартов</h2>
+        <p className="mt-4 max-w-3xl text-base leading-7 text-steel">
+          На старом сайте раздел галереи представлен как отдельный пункт навигации. Медиа-архив будет наполняться ссылками на фото и видео забегов из админ-панели.
+        </p>
+      </section>
+
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-5 lg:grid-cols-3">
           {memberships.map((membership) => (
@@ -166,22 +152,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-carbon py-16">
+      <section id="trainers" className="bg-carbon py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Trainers</p>
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Тренеры</p>
           <h2 className="mt-3 text-4xl font-black text-chrome">Тренеры DAGRUN</h2>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {trainers.map((trainer) => (
               <article key={trainer.name} className="overflow-hidden rounded-lg border border-white/10 bg-night shadow-panel">
-                <div
-                  className="h-72 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${trainer.image})` }}
-                />
+                <div className="h-72 bg-cover bg-center" style={{ backgroundImage: `url(${trainer.image})` }} />
                 <div className="p-5">
                   <h3 className="text-xl font-black text-chrome">{trainer.name}</h3>
-                  <p className="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-steel">
-                    {trainer.role}
-                  </p>
+                  <p className="mt-2 text-sm font-bold uppercase tracking-[0.14em] text-steel">{trainer.role}</p>
+                  <p className="mt-4 text-sm leading-6 text-steel">{trainer.description}</p>
                 </div>
               </article>
             ))}
@@ -189,13 +171,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Partners</p>
-        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <section id="partners" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-gold">Партнёры</p>
+        <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-4">
           {partners.map((partner) => (
-            <div key={partner} className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-8 text-center text-sm font-black uppercase tracking-[0.12em] text-chrome">
-              {partner}
-            </div>
+            <Link
+              key={partner.name}
+              href={partner.url}
+              className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-8 text-center text-sm font-black uppercase tracking-[0.12em] text-chrome"
+            >
+              {partner.name}
+            </Link>
           ))}
         </div>
       </section>

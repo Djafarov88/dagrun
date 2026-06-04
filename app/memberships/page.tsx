@@ -1,19 +1,21 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SectionHeader } from "@/components/SectionHeader";
+import { clubContent } from "@/lib/dagrun-content";
 import { memberships } from "@/lib/memberships";
 
 export const metadata: Metadata = {
-  title: "Клуб",
-  description: "Тренировочные форматы и клубные пакеты DAGRUN для бегунов Дагестана."
+  title: "Абонементы",
+  description: "Актуальные абонементы и цены DAGRUN с dagrun.ru."
 };
 
 export default function MembershipsPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
       <SectionHeader
-        eyebrow="Membership"
-        title="Тренируйся с DAGRUN"
-        description="Выберите формат подготовки: от регулярных групповых тренировок до персонального сопровождения к стартам."
+        eyebrow="Абонементы"
+        title="Абонементы DAGRUN"
+        description="Реальные тарифы с текущего сайта DAGRUN. Индивидуальная подготовка рассчитывается отдельно в зависимости от цели и сроков."
       />
       <div className="mt-10 grid gap-5 lg:grid-cols-3">
         {memberships.map((membership) => (
@@ -29,11 +31,19 @@ export default function MembershipsPage() {
                 </li>
               ))}
             </ul>
-            <button className="mt-8 w-full rounded-md bg-gold px-5 py-3 text-sm font-black text-night transition hover:bg-chrome">
-              Записаться
-            </button>
           </article>
         ))}
+      </div>
+      <div className="mt-10 rounded-lg border border-white/10 bg-white/[0.04] p-6 shadow-panel">
+        <h2 className="text-2xl font-black text-chrome">Запись на тренировку</h2>
+        <p className="mt-3 text-sm leading-6 text-steel">{clubContent.schedule}</p>
+        <p className="mt-2 text-sm leading-6 text-steel">{clubContent.location}</p>
+        <Link
+          href={clubContent.telegram}
+          className="mt-6 inline-flex rounded-md bg-gold px-5 py-3 text-sm font-black uppercase tracking-[0.1em] text-night transition hover:bg-chrome"
+        >
+          Написать в Telegram
+        </Link>
       </div>
     </section>
   );
