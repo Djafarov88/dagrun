@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { RegistrationStatus } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { saveParticipant } from "@/app/events/[slug]/register/actions";
 import { RegistrationShell } from "@/components/registration/RegistrationShell";
@@ -46,6 +47,7 @@ export default async function ParticipantPage({ params, searchParams }: Particip
 
   const taken = distance._count.registrations;
   const soldOut = distance.slotLimit !== null && taken >= distance.slotLimit;
+  const registrationClosed = distance.event.registrationStatus !== RegistrationStatus.OPEN;
   const action = saveParticipant.bind(null, params.slug, distance.id);
 
   return (
@@ -55,7 +57,11 @@ export default async function ParticipantPage({ params, searchParams }: Particip
       title="Participant information"
       description={`${distance.event.title} / ${distance.title} / ${formatMoney(distance.price)}`}
     >
-      {soldOut ? (
+      {registrationClosed ? (
+        <div className="rounded-lg border border-flame/40 bg-flame/10 p-5 text-sm font-bold text-flame">
+          Registration is not open for this race.
+        </div>
+      ) : soldOut ? (
         <div className="rounded-lg border border-flame/40 bg-flame/10 p-5 text-sm font-bold text-flame">
           This distance is sold out.
         </div>

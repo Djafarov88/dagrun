@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ParticipantRegistrationStatus } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { RegistrationShell } from "@/components/registration/RegistrationShell";
 import { prisma } from "@/lib/prisma";
@@ -30,7 +31,11 @@ export default async function SuccessPage({ params, searchParams }: SuccessPageP
     include: { event: true, distance: true }
   });
 
-  if (!registration || registration.event.slug !== params.slug) {
+  if (
+    !registration ||
+    registration.event.slug !== params.slug ||
+    registration.status !== ParticipantRegistrationStatus.PAID
+  ) {
     notFound();
   }
 

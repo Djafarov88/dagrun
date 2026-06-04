@@ -109,6 +109,7 @@ model Registration {
   @@index([userId])
   @@index([email])
   @@index([status])
+  @@unique([eventId, email])
 }
 
 model Membership {

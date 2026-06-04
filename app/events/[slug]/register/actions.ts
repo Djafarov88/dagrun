@@ -4,17 +4,20 @@ import { ParticipantRegistrationStatus, RegistrationStatus } from "@prisma/clien
 import { redirect } from "next/navigation";
 import {
   activeRegistrationStatuses,
+  optionalBirthDate,
   optionalFormString,
-  requiredFormString
+  requiredEmail,
+  requiredFormString,
+  requiredPhone
 } from "@/lib/registration";
 import { prisma } from "@/lib/prisma";
 
 export async function saveParticipant(slug: string, distanceId: string, formData: FormData) {
   const firstName = requiredFormString(formData, "firstName");
   const lastName = requiredFormString(formData, "lastName");
-  const email = requiredFormString(formData, "email").toLowerCase();
-  const phone = requiredFormString(formData, "phone");
-  const birthDateValue = optionalFormString(formData, "birthDate");
+  const email = requiredEmail(formData, "email");
+  const phone = requiredPhone(formData, "phone");
+  const birthDate = optionalBirthDate(formData, "birthDate");
   const emergencyContact = optionalFormString(formData, "emergencyContact");
 
   const distance = await prisma.distance.findUnique({
@@ -26,26 +29,59 @@ export async function saveParticipant(slug: string, distanceId: string, formData
     throw new Error("Registration is not available for this distance");
   }
 
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { name: `${firstName} ${lastName}` },
-    create: { email, name: `${firstName} ${lastName}` }
-  });
+  const registration = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.upsert({
+      where: { email },
+      update: { name: `${firstName} ${lastName}` },
+      create: { email, name: `${firstName} ${lastName}` }
+    });
 
-  const registration = await prisma.registration.create({
-    data: {
-      eventId: distance.eventId,
-      distanceId: distance.id,
-      userId: user.id,
-      firstName,
-      lastName,
-      email,
-      phone,
-      birthDate: birthDateValue ? new Date(birthDateValue) : null,
-      emergencyContact,
-      status: ParticipantRegistrationStatus.DRAFT
-    },
-    select: { id: true }
+    const existingRegistration = await tx.registration.findUnique({
+      where: {
+        eventId_email: {
+          eventId: distance.eventId,
+          email
+        }
+      },
+      select: { id: true, status: true }
+    });
+
+    if (existingRegistration && existingRegistration.status !== ParticipantRegistrationStatus.DRAFT) {
+      throw new Error("This email is already registered for this race");
+    }
+
+    if (existingRegistration) {
+      return tx.registration.update({
+        where: { id: existingRegistration.id },
+        data: {
+          distanceId: distance.id,
+          userId: user.id,
+          firstName,
+          lastName,
+          phone,
+          birthDate,
+          emergencyContact,
+          status: ParticipantRegistrationStatus.DRAFT
+        },
+        select: { id: true }
+      });
+    }
+
+    return tx.registration.create({
+      data: {
+        eventId: distance.eventId,
+        distanceId: distance.id,
+        userId: user.id,
+        firstName,
+        lastName,
+        email,
+        phone,
+        birthDate,
+        emergencyContact,
+        status: ParticipantRegistrationStatus.DRAFT
+      },
+      select: { id: true }
+    });
   });
 
   redirect(`/events/${slug}/register/confirm?registrationId=${registration.id}`);
@@ -65,9 +101,19 @@ export async function confirmRegistration(slug: string, registrationId: string) 
       throw new Error("Registration not found");
     }
 
+    if (registration.status === ParticipantRegistrationStatus.PAYMENT_PENDING) {
+      return;
+    }
+
+    if (registration.status !== ParticipantRegistrationStatus.DRAFT) {
+      throw new Error("Registration cannot be confirmed from its current status");
+    }
+
     if (registration.event.registrationStatus !== RegistrationStatus.OPEN) {
       throw new Error("Registration is closed");
     }
+
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${registration.distanceId})::bigint)`;
 
     if (registration.distance.slotLimit !== null) {
       const activeCount = await tx.registration.count({
@@ -86,12 +132,27 @@ export async function confirmRegistration(slug: string, registrationId: string) 
       where: { id: registration.id },
       data: { status: ParticipantRegistrationStatus.PAYMENT_PENDING }
     });
+  }, {
+    isolationLevel: "Serializable"
   });
 
   redirect(`/events/${slug}/register/payment/${registrationId}`);
 }
 
 export async function completePayment(slug: string, registrationId: string) {
+  const registration = await prisma.registration.findUnique({
+    where: { id: registrationId },
+    include: { event: true }
+  });
+
+  if (!registration || registration.event.slug !== slug) {
+    throw new Error("Registration not found");
+  }
+
+  if (registration.status !== ParticipantRegistrationStatus.PAYMENT_PENDING) {
+    throw new Error("Registration is not awaiting payment");
+  }
+
   await prisma.registration.update({
     where: { id: registrationId },
     data: { status: ParticipantRegistrationStatus.PAID }

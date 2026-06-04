@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ParticipantRegistrationStatus } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { completePayment } from "@/app/events/[slug]/register/actions";
 import { RegistrationShell } from "@/components/registration/RegistrationShell";
@@ -25,7 +26,11 @@ export default async function PaymentPage({ params }: PaymentPageProps) {
     include: { event: true, distance: true }
   });
 
-  if (!registration || registration.event.slug !== params.slug) {
+  if (
+    !registration ||
+    registration.event.slug !== params.slug ||
+    registration.status !== ParticipantRegistrationStatus.PAYMENT_PENDING
+  ) {
     notFound();
   }
 
