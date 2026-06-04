@@ -6,7 +6,21 @@ type CountdownProps = {
   targetDate: string;
 };
 
-function getRemaining(targetDate: string) {
+type Remaining = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+const stableRemaining: Remaining = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0
+};
+
+function getRemaining(targetDate: string): Remaining {
   const diff = Math.max(0, new Date(targetDate).getTime() - Date.now());
 
   return {
@@ -18,18 +32,23 @@ function getRemaining(targetDate: string) {
 }
 
 export function Countdown({ targetDate }: CountdownProps) {
-  const [remaining, setRemaining] = useState(() => getRemaining(targetDate));
+  const [mounted, setMounted] = useState(false);
+  const [remaining, setRemaining] = useState<Remaining>(stableRemaining);
+  const displayRemaining = mounted ? remaining : stableRemaining;
   const items = useMemo(
     () => [
-      ["Дней", remaining.days],
-      ["Часов", remaining.hours],
-      ["Минут", remaining.minutes],
-      ["Секунд", remaining.seconds]
+      ["Дней", displayRemaining.days],
+      ["Часов", displayRemaining.hours],
+      ["Минут", displayRemaining.minutes],
+      ["Секунд", displayRemaining.seconds]
     ],
-    [remaining]
+    [displayRemaining]
   );
 
   useEffect(() => {
+    setMounted(true);
+    setRemaining(getRemaining(targetDate));
+
     const timer = window.setInterval(() => {
       setRemaining(getRemaining(targetDate));
     }, 1000);
