@@ -129,9 +129,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             <p className="mt-3 text-sm font-bold leading-6 text-night/70">
               Выберите дистанцию, получите номер участника и доступ в стартовый городок.
             </p>
-            <button className="mt-6 w-full rounded-md bg-night px-5 py-4 text-sm font-black uppercase tracking-[0.1em] text-chrome transition hover:bg-carbon">
+            <Link href={`/events/${event.slug}/register`} className="mt-6 block w-full rounded-md bg-night px-5 py-4 text-center text-sm font-black uppercase tracking-[0.1em] text-chrome transition hover:bg-carbon">
               Зарегистрироваться
-            </button>
+            </Link>
           </aside>
         </div>
       </section>

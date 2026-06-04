@@ -11,12 +11,23 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  const [raceCount, distanceCount, registrationCount, openRaceCount, races, registrationsByRace] =
+  const [
+    raceCount,
+    distanceCount,
+    registrationCount,
+    openRaceCount,
+    paidRegistrationCount,
+    pendingRegistrationCount,
+    races,
+    registrationsByRace
+  ] =
     await Promise.all([
       prisma.event.count(),
       prisma.distance.count(),
       prisma.registration.count(),
       prisma.event.count({ where: { registrationStatus: "OPEN" } }),
+      prisma.registration.count({ where: { status: "PAID" } }),
+      prisma.registration.count({ where: { status: "PAYMENT_PENDING" } }),
       prisma.event.findMany({
         orderBy: { date: "asc" },
         include: {
@@ -34,7 +45,9 @@ export default async function AdminPage() {
     { label: "Races", value: raceCount },
     { label: "Open registration", value: openRaceCount },
     { label: "Distances", value: distanceCount },
-    { label: "Registrations", value: registrationCount }
+    { label: "Registrations", value: registrationCount },
+    { label: "Paid", value: paidRegistrationCount },
+    { label: "Payment pending", value: pendingRegistrationCount }
   ];
 
   const registrationMap = new Map(
@@ -61,7 +74,7 @@ export default async function AdminPage() {
         </Link>
       </div>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <article key={stat.label} className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-panel">
             <p className="text-sm font-black uppercase tracking-[0.14em] text-steel">{stat.label}</p>

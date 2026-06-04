@@ -19,6 +19,14 @@ enum RegistrationStatus {
   CLOSED
 }
 
+enum ParticipantRegistrationStatus {
+  DRAFT
+  CONFIRMED
+  PAYMENT_PENDING
+  PAID
+  CANCELLED
+}
+
 enum MembershipTier {
   STARTER
   REGULAR
@@ -72,20 +80,35 @@ model Distance {
   elevation Int?
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrations Registration[]
 
   @@index([eventId])
 }
 
 model Registration {
-  id        String   @id @default(cuid())
-  eventId   String
-  userId    String
-  createdAt DateTime @default(now())
+  id               String                        @id @default(cuid())
+  eventId          String
+  distanceId       String
+  userId           String
+  firstName        String
+  lastName         String
+  email            String
+  phone            String
+  birthDate        DateTime?
+  emergencyContact String?
+  status           ParticipantRegistrationStatus @default(DRAFT)
+  createdAt        DateTime                      @default(now())
+  updatedAt        DateTime                      @updatedAt
 
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  distance Distance @relation(fields: [distanceId], references: [id], onDelete: Restrict)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([distanceId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
 }
 
 model Membership {
