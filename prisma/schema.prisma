@@ -45,6 +45,9 @@ model Event {
   date               DateTime
   city               String
   coverImage         String
+  photoLinks         String[]           @default([])
+  videoLinks         String[]           @default([])
+  resultsLinks       String[]           @default([])
   registrationStatus RegistrationStatus @default(SOON)
   status             EventStatus        @default(DRAFT)
   createdAt          DateTime           @default(now())
@@ -64,6 +67,8 @@ model Distance {
   eventId   String
   title     String
   lengthKm  Decimal @db.Decimal(5, 2)
+  price     Decimal @default(0) @db.Decimal(10, 2)
+  slotLimit Int?
   elevation Int?
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
